@@ -1,0 +1,125 @@
+---
+title: "Big Data Finds Music Bands In Other Genres Similar To Your Favorite Genre"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(reticulate) # install.packages('reticulate')
+use_python('/anaconda3/bin/python') 
+```
+
+
+```{python echo=FALSE, message=FALSE, warning=FALSE}
+# imports of python libraries  ## instruction, a little information on what are these each library and what for
+import pyreadr
+import random
+import spacy
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+import plotly.offline as py
+from sklearn.decomposition import PCA
+```
+
+```{python echo=FALSE, message=FALSE, warning=FALSE}
+# functions
+
+def word2vec(text):
+    doc = nlp(text)
+    return doc.vector
+```
+
+```{python echo=FALSE, message=FALSE, warning=FALSE, results="hide"}
+# reading data which has been preproccesed with 'Text_Processing.Rmd'
+tmp = pyreadr.read_r('../output/processed_lyrics.RData')
+dt_lyrics = tmp['dt_lyrics']
+dt_lyrics = dt_lyrics.sample(10000, random_state=0)
+
+# Load the spacy model that you have installed
+nlp = spacy.load('en_core_web_md')
+
+artists_df = dt_lyrics.groupby(['artist', 'genre'])['stemmedwords'].apply(' '.join).reset_index()
+
+lyric_vectors = [word2vec(x) for x in artists_df.stemmedwords]
+
+pca = PCA(n_components=2)
+result = pca.fit_transform(lyric_vectors)
+
+
+artists = artists_df.artist.tolist()
+genres = artists_df.genre.tolist()
+# genres_list = artists_df.genre.unique()
+genres_list = ["Rock", "Pop", "R&B", "Electronic", "Jazz", "Indie", "Country", "Metal", "Hip-Hop", "Folk", "Other"]
+colors = {"Metal": "rgb(212, 25, 25)",
+          "Folk": "rgb(130, 18, 18)",
+          "Country": "rgb(255, 136, 18)",
+          "Pop": "rgb(230, 142, 142)",
+          "Indie": "rgb(46, 148, 38)",
+          "Rock": "rgb(7, 240, 232)",
+          "R&B": "rgb(235, 235, 28)",
+          "Electronic": "rgb(22, 29, 245)",
+          "Jazz": "rgb(255, 18, 251)",
+          "Hip-Hop": "rgb(252, 182, 250)",
+          "Other": "rgb(10, 6, 66)"}
+# for genre in genres_list:
+#     colors[genre] = 'rgb({},{},{})'.format(random.randint(0, 256), random.randint(0, 256), random.randint(0, 256))
+x = {}
+y = {}
+labels = {}
+for i, artist in enumerate(artists):
+    genre = genres[i]
+    if genre not in x:
+        x[genre] = []
+        y[genre] = []
+        labels[genre] = []
+    x[genre].append(result[i, 0])
+    y[genre].append(result[i, 1])
+    labels[genre].append(artist)
+
+fig = go.Figure()
+for genre in genres_list:
+    fig.add_trace(go.Scatter(
+        x=x[genre],
+        y=y[genre],
+        mode="markers",
+        hovertext=labels[genre],
+        marker_color=colors[genre],
+        name=genre
+    ))
+    
+fig.update_layout(
+    autosize=False,
+    width=1000,
+    height=500
+)
+
+
+py.plot(fig, filename = "../output/artists_scatter_plot_reproducible.html", auto_open=False)
+```
+
+
+
+
+
+If you are a big fan of music and listening to that is in your everyday routine, this article will be interesting for you. There are millions of music out there, in different genres and in each genre there are lots of singers and bands who are popular. It is common that most people have their comfort zone in music and they mostly stick to their favorite genre and their favorite bands and artists. Due to the large amount of possible options, finding a new pleasing genre or band might be extremely overwhelming. However, do not worry, “Data Science” is here to help! 
+
+
+```{r, echo=FALSE}
+htmltools::includeHTML("../output/artists_scatter_plot_reproducible.html")
+```
+
+
+The above plot is not the distribution of the coming United States’ presidential candidates' votes. It shows how the lyrics of different artists in music in different genres are close semantically. Each color represents each genre of music. Each point is one artist in that genre. There are some really interesting facts hidden in this distribution!
+
+For example, as can be seen, in comparison to Rock and Pop, lyrics in Metal and Hip-Hop genres distributed in a small section of the plot. Also, they are far from the others. This means that both Metal and Hip-Hop has a different purpose in their lyrics, also different lyrics in these genres share some common concept. On the other hand, Pop and Rock music include a more diverse set of concepts in their lyrics. By looking at the most frequent words of each genre we can support these facts too. As an example, in all genres except the Metal genre where the most frequent word is “time”, this word is “love” which shows the inherent semantic difference between lyrics in Metal and other genres. You can see top words of "Folk" and "Metal" genres in the below figures.
+
+
+```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="Left: Folk, Right: Metal",fig.show='hold',fig.align='center'}
+knitr::include_graphics(c("../output/Folk.png","../output/Metal.png"))
+```
+
+Art always comes with creativity. So, having artists that not follow the norms of their genres might not be that surprising. The provided semantic similarity plot can easily help us find such artists. If you are into Metal because of its content, you can try [“Fog”](https://en.wikipedia.org/wiki/Fog_(band)) or [“Focus”](https://en.wikipedia.org/wiki/Focus_(band)) bands in Rock genre or “Chrome-sparks” in Pop, they might have something for your taste. Hip-Hop fans who want to try something in Electronic can go for [“Gotan-project”](https://en.wikipedia.org/wiki/Gotan_Project) or if they want to try Rock, they can listen to [“Aterciopelados”](https://en.wikipedia.org/wiki/Aterciopelados). It might be weird, but we have something for Metal fans in Hip-Hop, [“Brian-doerksen”](https://en.wikipedia.org/wiki/Brian_Doerksen)!
+
+
+I suggest you keep this handy semantic map somewhere. Whenever you are in the mood of trying something new, similar to ones you like or really far from them, you can easily hover over it and find some fascinating band to listen to!

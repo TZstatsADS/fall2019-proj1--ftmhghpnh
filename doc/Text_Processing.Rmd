@@ -1,7 +1,9 @@
 ---
 title: "Stem Completion"
 author: "Chengliang Tang, Arpita Shah, Yujie Wang and Tian Zheng"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -131,7 +133,7 @@ dt_lyrics <- dt_lyrics %>%
   inner_join(completed)
 ```
 
-### Exporting the processed text data into a CSV file
+### Exporting the processed text data into a CSV filez
 
 ```{r export data}
 save(dt_lyrics, file="../output/processed_lyrics.RData")
