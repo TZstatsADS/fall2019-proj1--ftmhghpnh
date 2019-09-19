@@ -116,7 +116,7 @@ For example, as can be seen, in comparison to Rock and Pop, lyrics in Metal and 
 
 
 ```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="Left: Folk, Right: Metal",fig.show='hold',fig.align='center'}
-knitr::include_graphics(c("../output/Folk.png","../output/Metal.png"))
+knitr::include_graphics(c("../figs/Folk.png","../figs/Metal.png"))
 ```
 
 Art always comes with creativity. So, having artists that not follow the norms of their genres might not be that surprising. The provided semantic similarity plot can easily help us find such artists. If you are into Metal because of its content, you can try [“Fog”](https://en.wikipedia.org/wiki/Fog_(band)) or [“Focus”](https://en.wikipedia.org/wiki/Focus_(band)) bands in Rock genre or “Chrome-sparks” in Pop, they might have something for your taste. Hip-Hop fans who want to try something in Electronic can go for [“Gotan-project”](https://en.wikipedia.org/wiki/Gotan_Project) or if they want to try Rock, they can listen to [“Aterciopelados”](https://en.wikipedia.org/wiki/Aterciopelados). It might be weird, but we have something for Metal fans in Hip-Hop, [“Brian-doerksen”](https://en.wikipedia.org/wiki/Brian_Doerksen)!
